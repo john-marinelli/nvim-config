@@ -7,7 +7,11 @@ vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right win
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 vim.keymap.set('n', '<leader>e', ':Terminal<CR>', { desc = '[E]xecute terminal' })
-vim.keymap.set('n', '<leader>c', ':bd<CR>')
+vim.keymap.set('n', '<leader>cw', ':bd<CR>', { desc = 'Close current buffer' })
+vim.keymap.set('n', '<leader>cc', ':qa<CR>', { desc = 'Close nvim' })
+
+vim.keymap.set('n', '<leader>oo', ':Obsidian<CR>')
+vim.keymap.set('n', '<leader>os', ':Obsidian search<CR>')
 
 vim.keymap.set('i', 'jk', '<Esc>')
 vim.api.nvim_create_autocmd('TextYankPost', {

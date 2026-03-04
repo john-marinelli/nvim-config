@@ -1,7 +1,7 @@
 return {
   'obsidian-nvim/obsidian.nvim',
   version = '*',
-  ft = 'markdown',
+  cmd = 'Obsidian',
   --@module 'obsidian'
   --@type obsidian.config
   opts = {
