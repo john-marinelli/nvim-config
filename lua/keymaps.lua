@@ -24,6 +24,12 @@ vim.keymap.set('n', '<leader>oi', function()
     vim.cmd('Obsidian new_from_template ' .. title .. ' idea')
   end
 end, { desc = 'Obsidian new [I]dea' })
+vim.keymap.set('n', '<leader>ol', function()
+  local title = vim.fn.input('Link title: ')
+  if title ~= '' then
+    vim.cmd('Obsidian new_from_template ' .. title .. ' link')
+  end
+end, { desc = 'Obsidian new [L]ink' })
 vim.keymap.set('n', '<leader>on', function()
   local title = vim.fn.input('Note title: ')
   if title ~= '' then

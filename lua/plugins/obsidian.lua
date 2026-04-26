@@ -52,6 +52,15 @@ return {
             return tostring(os.time())
           end,
         },
+        link = {
+          notes_subdir = 'links',
+          note_id_func = function(title)
+            if title then
+              return title:gsub(' ', '-'):gsub('[^A-Za-z0-9%-]', ''):lower()
+            end
+            return tostring(os.time())
+          end,
+        },
       },
     },
   },
