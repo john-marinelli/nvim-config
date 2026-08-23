@@ -11,7 +11,44 @@ vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left wind
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
-vim.keymap.set('n', '<leader>e', ':Terminal<CR>', { desc = '[E]xecute terminal' })
+local terminal_bufnr = nil
+local terminal_winid = nil
+
+local function open_terminal()
+  if terminal_winid and vim.api.nvim_win_is_valid(terminal_winid) then
+    vim.api.nvim_set_current_win(terminal_winid)
+    vim.cmd.startinsert()
+    return
+  end
+
+  vim.cmd('botright split')
+  vim.cmd('resize 15')
+
+  if terminal_bufnr and vim.api.nvim_buf_is_valid(terminal_bufnr) then
+    vim.api.nvim_win_set_buf(0, terminal_bufnr)
+  else
+    vim.cmd.terminal()
+    terminal_bufnr = vim.api.nvim_get_current_buf()
+    vim.bo[terminal_bufnr].buflisted = false
+  end
+
+  terminal_winid = vim.api.nvim_get_current_win()
+  vim.cmd.startinsert()
+end
+
+local function close_terminal()
+  if terminal_winid and vim.api.nvim_win_is_valid(terminal_winid) then
+    vim.api.nvim_win_close(terminal_winid, true)
+  end
+
+  terminal_winid = nil
+end
+
+vim.keymap.set('n', '<leader>tt', open_terminal, { desc = '[T]erminal open' })
+vim.keymap.set('n', '<leader>tc', close_terminal, { desc = '[T]erminal [C]lose' })
+vim.keymap.set('n', '<leader>e', open_terminal, { desc = '[E]xecute terminal' })
+vim.keymap.set('n', '<leader>v', ':vsplit<CR>', { desc = '[V]ertical split' })
+vim.keymap.set('n', '<leader>cv', ':close<CR>', { desc = '[C]lose current [V]split/window' })
 vim.keymap.set('n', '<leader>cw', ':bd<CR>', { desc = 'Close current buffer' })
 vim.keymap.set('n', '<leader>cc', ':qa<CR>', { desc = 'Close nvim' })
 
