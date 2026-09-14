@@ -1,44 +1,72 @@
+local ensure_installed = {
+  'bash',
+  'c',
+  'diff',
+  'html',
+  'javascript',
+  'latex',
+  'lua',
+  'luadoc',
+  'markdown',
+  'markdown_inline',
+  'mojo',
+  'query',
+  'tsx',
+  'typescript',
+  'vim',
+  'vimdoc',
+}
+
 return {
   'nvim-treesitter/nvim-treesitter',
+  branch = 'main',
+  lazy = false,
   build = ':TSUpdate',
   dependencies = {
-    {
-      'dmitry-salin/tree-sitter-mojo',
-      config = function(plugin)
-        local query_file = assert(io.open(plugin.dir .. '/nvim-queries/mojo/highlights.scm', 'r'))
-        local highlights = query_file:read '*a'
-        query_file:close()
-        vim.treesitter.query.set('mojo', 'highlights', highlights)
-      end,
-    },
+    'dmitry-salin/tree-sitter-mojo',
   },
-  config = function(_, opts)
-    local parsers = require('nvim-treesitter.parsers').get_parser_configs()
-    parsers.mojo = {
-      install_info = {
-        url = 'https://github.com/dmitry-salin/tree-sitter-mojo',
-        files = { 'src/parser.c', 'src/scanner.c' },
-        branch = 'main',
-      },
-      filetype = 'mojo',
-    }
+  config = function()
+    local function register_mojo_parser()
+      require('nvim-treesitter.parsers').mojo = {
+        install_info = {
+          url = 'https://github.com/dmitry-salin/tree-sitter-mojo',
+          branch = 'main',
+        },
+      }
+    end
 
-    require('nvim-treesitter.configs').setup(opts)
+    register_mojo_parser()
+    vim.api.nvim_create_autocmd('User', {
+      pattern = 'TSUpdate',
+      callback = register_mojo_parser,
+    })
+
+    local query_file = assert(io.open(vim.fn.stdpath 'data' .. '/lazy/tree-sitter-mojo/nvim-queries/mojo/highlights.scm', 'r'))
+    local highlights = query_file:read '*a'
+    query_file:close()
+    vim.treesitter.query.set('mojo', 'highlights', highlights)
+
+    local treesitter = require 'nvim-treesitter'
+    treesitter.setup()
+    treesitter.install(ensure_installed):wait(300000)
+
+    local configured = {}
+    for _, language in ipairs(ensure_installed) do
+      configured[language] = true
+    end
+
+    vim.api.nvim_create_autocmd('FileType', {
+      group = vim.api.nvim_create_augroup('treesitter-highlight', { clear = true }),
+      callback = function(event)
+        local filetype = vim.bo[event.buf].filetype
+        local language = vim.treesitter.language.get_lang(filetype) or filetype
+        if not configured[language] then
+          return
+        end
+
+        vim.treesitter.start(event.buf, language)
+        vim.bo[event.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+      end,
+    })
   end,
-  -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
-  opts = {
-    ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'mojo', 'query', 'vim', 'vimdoc', 'javascript', 'typescript', 'tsx' },
-    auto_install = true,
-    highlight = {
-      enable = true,
-      -- Some languages depend on vim's regex highlighting system (such as Ruby) for indent rules.
-      --  If you are experiencing weird indenting issues, add the language to
-      --  the list of additional_vim_regex_highlighting and disabled languages for indent.
-      additional_vim_regex_highlighting = { 'ruby' },
-    },
-    indent = { enable = true, disable = { 'ruby' } },
-  },
-  --    - Incremental selection: Included, see `:help nvim-treesitter-incremental-selection-mod`
-  --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
-  --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
 }
